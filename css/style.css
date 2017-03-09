@@ -115,7 +115,7 @@ input {
   position: absolute;
   right: 78px;
   top: 0;
-  padding: 5px 15px;
+  padding: 7px 15px 3px 15px;
 }
 
 .main-list .edit:hover {
