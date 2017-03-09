@@ -1,47 +1,47 @@
-// объект js для отслеживания состояния дерева объектов
+// initial data -  js array for building a tree
 const musicTreeObj = [
-	{ parent: "Hard Rock",
+	{ title: "Hard Rock",
   	children: [
-  		{ parent: "Scorpions",
+  		{ title: "Scorpions",
         children: [
-          { parent: "Crazy World",
+          { title: "Crazy World",
             children: []
           },
-          { parent: "Blackout",
+          { title: "Blackout",
             children: []
           }
     		]
   		},
-      { parent: "AC/DC",
+      { title: "AC/DC",
       	children: [
-        	{ parent: "Black in Black",
+        	{ title: "Black in Black",
           	children: []
           },
-          { parent: "Highway to Hell",
+          { title: "Highway to Hell",
           	children: []
           },
-          { parent: "High Voltage",
+          { title: "High Voltage",
           	children: []
           }
         ]
       }
   	]
 	},
-  { parent: "Thrash Metal",
+  { title: "Thrash Metal",
     children: [
-    	{ parent: "Metallica",
+    	{ title: "Metallica",
         children: [
-          { parent: "Muster of Puppets",
+          { title: "Muster of Puppets",
             children: []
           },
-          { parent: "Metallica",
+          { title: "Metallica",
             children: []
           }
     		]
   		},
-      { parent: "Megadeth",
+      { title: "Megadeth",
         children: [
-          { parent: "Rust in Peace",
+          { title: "Rust in Peace",
             children: []
           }
     		]
@@ -49,21 +49,21 @@ const musicTreeObj = [
     ]
   },
   {
-  	parent: "Nu Metal",
+  	title: "Nu Metal",
     children: [
-    	{ parent: "Korn",
+    	{ title: "Korn",
         children: [
-          { parent: "Follow the Leader",
+          { title: "Follow the Leader",
             children: []
           },
-          { parent: "Issues",
+          { title: "Issues",
             children: []
           }
     		]
   		},
-      { parent: "Slipknot",
+      { title: "Slipknot",
         children: [
-          { parent: "Iowa",
+          { title: "Iowa",
             children: []
           }
     		]
@@ -72,45 +72,47 @@ const musicTreeObj = [
   }
 ]
 
-// Класс для добавления дерева объектов в контейнер
-function SuperTreeDom(destination, arrObjects) {
-  this.des = destination;
-  this.arr = arrObjects;
-}
-
-SuperTreeDom.prototype.addTreeOnPage = function() {
-  this.des.appendChild(buildTreeDom(this.arr))
-
-  function buildTreeDom(arr) {
-  	if ( arr.length === 0 ) return;
-
-    var ulElem = document.createElement("UL");
-
-    for ( var elId = 0; elId < arr.length; elId++ ) {
-    	var liElem = createLiElem(arr[elId].parent);
+// class for working with initial data
+class SuperTreeDom {
+	constructor (destination, arrObjects) {
+  	this.des = destination;
+  	this.arr = arrObjects;
+	}
+  
+  // add a tree on page
+  addTreeOnPage() {
+  	this.des.appendChild(this.buildTreeDom(this.arr));
+  }
+  
+  // build a tree from initial date
+  buildTreeDom(initialData) {
+  	if ( initialData.length === 0 ) return;
       
-      var nestedUl = buildTreeDom(arr[elId].children);
-      if ( nestedUl ) liElem.appendChild(nestedUl);
-
-      ulElem.appendChild(liElem);
-    }
-
+  	let ulElem = document.createElement("UL");
+      
+  	initialData.forEach( 
+  		item => {
+      	let liElem = createLiElem(item.title);
+        
+    		let nestedUl = this.buildTreeDom(item.children);
+    		if ( nestedUl ) liElem.appendChild(nestedUl);
+        
+    		ulElem.appendChild(liElem);
+  		}
+  	);
+      
   	return ulElem;
   }
 }
 
-SuperTreeDom.prototype.addListElInObj = function() {
-	var arrTemp = [];
-}
-
 //Добавляем дерево обектов в контейнер на странице
 var container = document.querySelector("#container");
-if ( localStorage.getItem("htmlConteiner") ) {
-	container.innerHTML = localStorage.getItem("htmlConteiner");
-} else {
+//if ( localStorage.getItem("htmlConteiner") ) {
+//	container.innerHTML = localStorage.getItem("htmlConteiner");
+//} else {
 	var treeInst = new SuperTreeDom(container, musicTreeObj);
   treeInst.addTreeOnPage();
-}
+//}
 
 // Раскрытие-закрытие дерева
 var treeUl = container.querySelector("ul");
@@ -120,12 +122,12 @@ treeUl.onclick = function(event) {
   if ( target.tagName === 'SPAN' && target.className === "close" ) {
   	target.parentNode.parentNode.removeChild(target.parentNode);
     localStorage.setItem("htmlConteiner", container.innerHTML);
-    
+
     return;
   } else if ( target.tagName === 'SPAN' && target.className === "add" ) {
   	var nameNewItem = prompt("Enter the name of the new item:", "");
     if (!nameNewItem) return;
-    
+
     if ( target.parentNode.lastElementChild.tagName === "UL" ) {
     	target.parentNode.lastElementChild.appendChild(createLiElem(nameNewItem));
     } else {
@@ -134,27 +136,27 @@ treeUl.onclick = function(event) {
       target.parentNode.appendChild(ulElem);
     }
     localStorage.setItem("htmlConteiner", container.innerHTML);
-    
+
     return;
   } else if ( target.tagName === 'SPAN' && target.className === "edit" ) {
   	var oldNameItem = target.parentNode.firstElementChild.innerHTML;
     var newNameItem = prompt("Enter the name of the new item:", oldNameItem);
     if (!newNameItem) return;
-    
+
     target.parentNode.firstElementChild.innerHTML = newNameItem;
     localStorage.setItem("htmlConteiner", container.innerHTML);
-  } 
+  }
   else if ( target.tagName === 'SPAN' ) {
   	var childrContainer = target.parentNode.querySelector("ul");
-  	
+
     if (!childrContainer) return;
-    
+
     childrContainer.hidden = !childrContainer.hidden;
     localStorage.setItem("htmlConteiner", container.innerHTML);
-    
+
     return;
   }
-  
+
   return;
 }
 
@@ -168,7 +170,7 @@ btnGen.onclick = function(event) {
     alert("You must write genre name!");
     return false;
   }
-  
+
   container.querySelector("ul").appendChild(createLiElem(inputGenre));
   document.querySelector("#inputGenre").value = "";
   localStorage.setItem("htmlConteiner", container.innerHTML);
@@ -183,20 +185,20 @@ function createLiElem(strInLi) {
   liElem.appendChild(spanElem);
 
   spanElem = document.createElement("SPAN");
-  spanElem.className = "close";
+  spanElem.classList.add("close");
   txtElem = document.createTextNode("\u00D7");
   spanElem.appendChild(txtElem);
   liElem.appendChild(spanElem);
-  
+
   spanElem = document.createElement("SPAN");
-  spanElem.className = "add";
+  spanElem.classList.add("add");
   txtElem = document.createTextNode("\u002B");
   spanElem.appendChild(txtElem);
   liElem.appendChild(spanElem);
-	
+
   spanElem = document.createElement("SPAN");
-  spanElem.className = "edit";
-  txtElem = document.createTextNode("p");
+  spanElem.classList.add("edit");
+  txtElem = document.createTextNode("\u002A");
   spanElem.appendChild(txtElem);
   liElem.appendChild(spanElem);
   return liElem;
