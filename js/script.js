@@ -86,22 +86,24 @@ class SuperTreeDom {
   
   // building a tree from initial data
   buildTreeDom(initialData) {
-  	if ( initialData.length === 0 ) return;
+  	if ( initialData.length !== 0 ) {
+    	let ulElem = document.createElement("UL");
       
-  	let ulElem = document.createElement("UL");
+  		initialData.map( 
+  			(item) => {
+      		let liElem = this.createLiElem(item.title);
+        	let nestedUl = this.buildTreeDom(item.children);
+    			
+          if ( nestedUl ) {
+          	liElem.appendChild(nestedUl);
+          }
+
+    			ulElem.appendChild(liElem);
+  			}
+  		);
       
-  	initialData.map( 
-  		(item) => {
-      	let liElem = this.createLiElem(item.title);
-        
-    		let nestedUl = this.buildTreeDom(item.children);
-    		if ( nestedUl ) liElem.appendChild(nestedUl);
-        
-    		ulElem.appendChild(liElem);
-  		}
-  	);
-      
-  	return ulElem;
+      return ulElem;
+    }
   }
   
   // creating li element
@@ -144,7 +146,7 @@ class SuperTreeDom {
     this.des.addEventListener("click", (event) => {
     	const target = event.target;
         
-      // events: folding/deleting/editing/creating
+      // events: closure/disclosure/deleting/editing/creating
       if ( target.tagName === 'SPAN' && target.classList.contains("delete") ) {
         target.closest("ul").removeChild(target.parentNode);
         
