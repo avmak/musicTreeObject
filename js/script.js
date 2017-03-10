@@ -1,47 +1,47 @@
 // initial data -  js array for building a tree
 const musicTreeObj = [
-	{ title: "Hard Rock",
+	{ title: 'Hard Rock',
   	children: [
-  		{ title: "Scorpions",
+  		{ title: 'Scorpions',
         children: [
-          { title: "Crazy World",
+          { title: 'Crazy World',
             children: []
           },
-          { title: "Blackout",
+          { title: 'Blackout',
             children: []
           }
     		]
   		},
-      { title: "AC/DC",
+      { title: 'AC/DC',
       	children: [
-        	{ title: "Black in Black",
+        	{ title: 'Black in Black',
           	children: []
           },
-          { title: "Highway to Hell",
+          { title: 'Highway to Hell',
           	children: []
           },
-          { title: "High Voltage",
+          { title: 'High Voltage',
           	children: []
           }
         ]
       }
   	]
 	},
-  { title: "Thrash Metal",
+  { title: 'Thrash Metal',
     children: [
-    	{ title: "Metallica",
+    	{ title: 'Metallica',
         children: [
-          { title: "Muster of Puppets",
+          { title: 'Muster of Puppets',
             children: []
           },
-          { title: "Metallica",
+          { title: 'Metallica',
             children: []
           }
     		]
   		},
-      { title: "Megadeth",
+      { title: 'Megadeth',
         children: [
-          { title: "Rust in Peace",
+          { title: 'Rust in Peace',
             children: []
           }
     		]
@@ -49,21 +49,21 @@ const musicTreeObj = [
     ]
   },
   {
-  	title: "Nu Metal",
+  	title: 'Nu Metal',
     children: [
-    	{ title: "Korn",
+    	{ title: 'Korn',
         children: [
-          { title: "Follow the Leader",
+          { title: 'Follow the Leader',
             children: []
           },
-          { title: "Issues",
+          { title: 'Issues',
             children: []
           }
     		]
   		},
-      { title: "Slipknot",
+      { title: 'Slipknot',
         children: [
-          { title: "Iowa",
+          { title: 'Iowa',
             children: []
           }
     		]
@@ -78,22 +78,24 @@ class SuperTreeDom {
   	this.des = destination;
   	this.arr = arrObjects;
 	}
-  
+
   // adding a tree on page
-  addTreeOnPage() {
-  	this.des.appendChild(this.buildTreeDom(this.arr));
+  _addTreeOnPage() {
+  	this.des.appendChild(this._buildTreeDom(this.arr));
   }
-  
+
   // building a tree from initial data
-  buildTreeDom(initialData) {
-  	if ( initialData.length !== 0 ) {
-    	let ulElem = document.createElement("UL");
-      
-  		initialData.map( 
+  _buildTreeDom(initialData) {
+  	if ( initialData.length ) {
+    	let ulElem = document.createElement('UL');
+
+  		initialData.map(
   			(item) => {
-      		let liElem = this.createLiElem(item.title);
-        	let nestedUl = this.buildTreeDom(item.children);
-    			
+        	let nestedUl = this._buildTreeDom(item.children),
+          		liElem = document.createElement('LI');
+
+          liElem.innerHTML = this.createLiElem(item.title);
+
           if ( nestedUl ) {
           	liElem.appendChild(nestedUl);
           }
@@ -101,119 +103,110 @@ class SuperTreeDom {
     			ulElem.appendChild(liElem);
   			}
   		);
-      
+
       return ulElem;
     }
   }
-  
+
   // creating li element
   createLiElem(title) {
-    let liElem = document.createElement("LI");
-    let spanElem = document.createElement("SPAN");
-    let textElem = document.createTextNode(title);
-    spanElem.appendChild(textElem);
-    liElem.appendChild(spanElem);
-    
-    spanElem = document.createElement("SPAN");
-    spanElem.classList.add("edit");
-    textElem = document.createTextNode("\u002A");
-    spanElem.appendChild(textElem);
-    liElem.appendChild(spanElem);
-    
-    spanElem = document.createElement("SPAN");
-		spanElem.classList.add("add");
-    textElem = document.createTextNode("\u002B");
-    spanElem.appendChild(textElem);
-    liElem.appendChild(spanElem);
-    
-    spanElem = document.createElement("SPAN");
-    spanElem.classList.add("delete");
-    textElem = document.createTextNode("\u00D7");
-    spanElem.appendChild(textElem);
-    liElem.appendChild(spanElem);
-
-    return liElem;
+    return `<span>${title}</span>
+    				<span class="edit">\u002A</span>
+            <span class="add">\u002B</span>
+            <span class="delete">\u00D7</span>`;
   }
-  
+
   // initialization tree objects
   initialization() {
-  	if ( localStorage.getItem("htmlConteiner") ) {
-    	this.des.innerHTML = localStorage.getItem("htmlConteiner");
+  	if ( localStorage.getItem('htmlConteiner') ) {
+    	this.des.innerHTML = localStorage.getItem('htmlConteiner');
     } else {
-    	this.addTreeOnPage();
+    	this._addTreeOnPage();
     }
-    
-    this.des.addEventListener("click", (event) => {
-    	const target = event.target;
-        
-      // events: closure/disclosure/deleting/editing/creating
-      if ( target.tagName === 'SPAN' && target.classList.contains("delete") ) {
-        target.closest("ul").removeChild(target.parentNode);
-        
-        localStorage.setItem("htmlConteiner", this.des.innerHTML);
-    		return;
-  		} else if ( target.tagName === 'SPAN' && target.classList.contains("add") ) {
-  				let nameNewItem = prompt("Enter the name of the new item:", "");
-    			if ( strIsEmpty(nameNewItem) ) return;
 
-    			if ( target.parentNode.lastElementChild.tagName === "UL" ) {
-    				target.parentNode.lastElementChild.appendChild(this.createLiElem(nameNewItem));
+    this.des.addEventListener('click', (event) => {
+    	const target = event.target;
+
+      // events: closure/disclosure/deleting/editing/creating
+      if ( target.tagName === 'SPAN' && target.classList.contains('delete') ) {
+        target.closest('ul').removeChild(target.parentNode);
+
+        localStorage.setItem('htmlConteiner', this.des.innerHTML);
+    		return;
+  		} else if ( target.tagName === 'SPAN' && target.classList.contains('add') ) {
+  				let nameNewItem = prompt('Enter the name of the new item:', '');
+    			if ( this.isStrEmpty(nameNewItem) ) return;
+
+          let liElem = document.createElement('LI'),
+          		ulElem;
+
+    			if ( target.parentNode.lastElementChild.tagName === 'UL' ) {
+          	liElem.innerHTML = this.createLiElem(nameNewItem);
+    				target.parentNode.lastElementChild.appendChild(liElem);
     			} else {
-    				let ulElem = document.createElement("UL");
-      			ulElem.appendChild(this.createLiElem(nameNewItem));
+    				let ulElem = document.createElement('UL');
+            liElem.innerHTML = this.createLiElem(nameNewItem);
+      			ulElem.appendChild(liElem);
       			target.parentNode.appendChild(ulElem);
     			}
-    			
-        	localStorage.setItem("htmlConteiner", this.des.innerHTML);
+
+        	localStorage.setItem('htmlConteiner', this.des.innerHTML);
     			return;
-  		} else if ( target.tagName === 'SPAN' && target.classList.contains("edit") ) {
-  				let oldNameItem = target.parentNode.firstElementChild.innerHTML;
-    			let newNameItem = prompt("Enter the name of the new item:", oldNameItem);
-    			if ( strIsEmpty(newNameItem) ) return;
-					
+  		} else if ( target.tagName === 'SPAN' && target.classList.contains('edit') ) {
+  				let oldNameItem = target.parentNode.firstElementChild.innerHTML,
+    					newNameItem = prompt('Enter the name of the new item:', oldNameItem);
+
+          if ( this.isStrEmpty(newNameItem) ) return;
+
           let textElem = document.createTextNode(newNameItem);
-          target.parentNode.firstElementChild.replaceChild(textElem, 
+          target.parentNode.firstElementChild.replaceChild(textElem,
           	target.parentNode.firstElementChild.firstChild);
-        
-    			localStorage.setItem("htmlConteiner", container.innerHTML);
+
+    			localStorage.setItem('htmlConteiner', container.innerHTML);
         	return;
   		}	else if ( target.tagName === 'SPAN' ) {
-  				let childrContainer = target.parentNode.querySelector("ul");
+  				let childrContainer = target.parentNode.querySelector('ul');
 					if ( !childrContainer ) return;
 
     			childrContainer.hidden = !childrContainer.hidden;
-        
-    			localStorage.setItem("htmlConteiner", this.des.innerHTML);
+
+    			localStorage.setItem('htmlConteiner', this.des.innerHTML);
     			return;
   		}
+
 			return;
     });
-    
-    // checking if a string is blank, null, undefined or contains only white-space
-    function strIsEmpty(str) {
-    	return ( !str || !str.trim() );
-		}
   }
+
+  // checking if a string is blank, null, undefined or contains only white-space
+  isStrEmpty(str) {
+    return ( !str || !str.trim() );
+	}
 }
 
 // check the working capacity of the class
-let container = document.querySelector("#container");
-let treeInst = new SuperTreeDom(container, musicTreeObj);
+let container = document.querySelector('#container'),
+		treeInst = new SuperTreeDom(container, musicTreeObj);
+
 treeInst.initialization();
 
 //adding a root node
-let btnGen = document.querySelector(".addBtn");
+let btnGen = document.querySelector('.addBtn');
 
 btnGen.onclick = (event) => {
-  let inputGenre = document.querySelector("#inputGenre").value;
+  let inputGenre = document.querySelector('#inputGenre').value,
+  		liElem;
 
-	if ( inputGenre === "" ) {
-    alert("You must write genre name!");
+	if ( treeInst.isStrEmpty(inputGenre) ) {
+    alert('You must write genre name!');
     return false;
   }
 
-  container.querySelector("ul").appendChild(treeInst.createLiElem(inputGenre));
-  document.querySelector("#inputGenre").value = "";
-  
-  localStorage.setItem("htmlConteiner", container.innerHTML);
+  liElem = document.createElement('LI');
+  liElem.innerHTML = treeInst.createLiElem(inputGenre);
+  container.querySelector('ul').appendChild(liElem);
+  document.querySelector('#inputGenre').value = '';
+
+  localStorage.setItem('htmlConteiner', container.innerHTML);
+  return;
 }
