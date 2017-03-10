@@ -79,20 +79,20 @@ class SuperTreeDom {
   	this.arr = arrObjects;
 	}
   
-  // add a tree on page
+  // adding a tree on page
   addTreeOnPage() {
   	this.des.appendChild(this.buildTreeDom(this.arr));
   }
   
-  // build a tree from initial date
+  // building a tree from initial data
   buildTreeDom(initialData) {
   	if ( initialData.length === 0 ) return;
       
   	let ulElem = document.createElement("UL");
       
-  	initialData.forEach( 
-  		item => {
-      	let liElem = createLiElem(item.title);
+  	initialData.map( 
+  		(item) => {
+      	let liElem = this.createLiElem(item.title);
         
     		let nestedUl = this.buildTreeDom(item.children);
     		if ( nestedUl ) liElem.appendChild(nestedUl);
@@ -103,103 +103,115 @@ class SuperTreeDom {
       
   	return ulElem;
   }
-}
+  
+  // creating li element
+  createLiElem(title) {
+    let liElem = document.createElement("LI");
+    let spanElem = document.createElement("SPAN");
+    let textElem = document.createTextNode(title);
+    spanElem.appendChild(textElem);
+    liElem.appendChild(spanElem);
+    
+    spanElem = document.createElement("SPAN");
+    spanElem.classList.add("edit");
+    textElem = document.createTextNode("\u002A");
+    spanElem.appendChild(textElem);
+    liElem.appendChild(spanElem);
+    
+    spanElem = document.createElement("SPAN");
+		spanElem.classList.add("add");
+    textElem = document.createTextNode("\u002B");
+    spanElem.appendChild(textElem);
+    liElem.appendChild(spanElem);
+    
+    spanElem = document.createElement("SPAN");
+    spanElem.classList.add("delete");
+    textElem = document.createTextNode("\u00D7");
+    spanElem.appendChild(textElem);
+    liElem.appendChild(spanElem);
 
-//Добавляем дерево обектов в контейнер на странице
-var container = document.querySelector("#container");
-//if ( localStorage.getItem("htmlConteiner") ) {
-//	container.innerHTML = localStorage.getItem("htmlConteiner");
-//} else {
-	var treeInst = new SuperTreeDom(container, musicTreeObj);
-  treeInst.addTreeOnPage();
-//}
-
-// Раскрытие-закрытие дерева
-var treeUl = container.querySelector("ul");
-
-treeUl.onclick = function(event) {
-	var target = event.target;
-  if ( target.tagName === 'SPAN' && target.className === "close" ) {
-  	target.parentNode.parentNode.removeChild(target.parentNode);
-    localStorage.setItem("htmlConteiner", container.innerHTML);
-
-    return;
-  } else if ( target.tagName === 'SPAN' && target.className === "add" ) {
-  	var nameNewItem = prompt("Enter the name of the new item:", "");
-    if (!nameNewItem) return;
-
-    if ( target.parentNode.lastElementChild.tagName === "UL" ) {
-    	target.parentNode.lastElementChild.appendChild(createLiElem(nameNewItem));
+    return liElem;
+  }
+  
+  // initialization tree objects
+  initialization() {
+  	if ( localStorage.getItem("htmlConteiner") ) {
+    	this.des.innerHTML = localStorage.getItem("htmlConteiner");
     } else {
-    	var ulElem = document.createElement("UL");
-      ulElem.appendChild(createLiElem(nameNewItem));
-      target.parentNode.appendChild(ulElem);
+    	this.addTreeOnPage();
     }
-    localStorage.setItem("htmlConteiner", container.innerHTML);
+    
+    this.des.addEventListener("click", (event) => {
+    	const target = event.target;
+        
+      // events: folding/deleting/editing/creating
+      if ( target.tagName === 'SPAN' && target.classList.contains("delete") ) {
+        target.closest("ul").removeChild(target.parentNode);
+        
+        localStorage.setItem("htmlConteiner", this.des.innerHTML);
+    		return;
+  		} else if ( target.tagName === 'SPAN' && target.classList.contains("add") ) {
+  				let nameNewItem = prompt("Enter the name of the new item:", "");
+    			if ( strIsEmpty(nameNewItem) ) return;
 
-    return;
-  } else if ( target.tagName === 'SPAN' && target.className === "edit" ) {
-  	var oldNameItem = target.parentNode.firstElementChild.innerHTML;
-    var newNameItem = prompt("Enter the name of the new item:", oldNameItem);
-    if (!newNameItem) return;
+    			if ( target.parentNode.lastElementChild.tagName === "UL" ) {
+    				target.parentNode.lastElementChild.appendChild(this.createLiElem(nameNewItem));
+    			} else {
+    				let ulElem = document.createElement("UL");
+      			ulElem.appendChild(this.createLiElem(nameNewItem));
+      			target.parentNode.appendChild(ulElem);
+    			}
+    			
+        	localStorage.setItem("htmlConteiner", this.des.innerHTML);
+    			return;
+  		} else if ( target.tagName === 'SPAN' && target.classList.contains("edit") ) {
+  				let oldNameItem = target.parentNode.firstElementChild.innerHTML;
+    			let newNameItem = prompt("Enter the name of the new item:", oldNameItem);
+    			if ( strIsEmpty(newNameItem) ) return;
+					
+          let textElem = document.createTextNode(newNameItem);
+          target.parentNode.firstElementChild.replaceChild(textElem, 
+          	target.parentNode.firstElementChild.firstChild);
+        
+    			localStorage.setItem("htmlConteiner", container.innerHTML);
+        	return;
+  		}	else if ( target.tagName === 'SPAN' ) {
+  				let childrContainer = target.parentNode.querySelector("ul");
+					if ( !childrContainer ) return;
 
-    target.parentNode.firstElementChild.innerHTML = newNameItem;
-    localStorage.setItem("htmlConteiner", container.innerHTML);
+    			childrContainer.hidden = !childrContainer.hidden;
+        
+    			localStorage.setItem("htmlConteiner", this.des.innerHTML);
+    			return;
+  		}
+			return;
+    });
+    
+    // checking if a string is blank, null, undefined or contains only white-space
+    function strIsEmpty(str) {
+    	return ( !str || !str.trim() );
+		}
   }
-  else if ( target.tagName === 'SPAN' ) {
-  	var childrContainer = target.parentNode.querySelector("ul");
-
-    if (!childrContainer) return;
-
-    childrContainer.hidden = !childrContainer.hidden;
-    localStorage.setItem("htmlConteiner", container.innerHTML);
-
-    return;
-  }
-
-  return;
 }
 
-//Добавление корневого узла с кнопкой удаления
-var btnGen = document.querySelector(".addBtn");
+// check the working capacity of the class
+let container = document.querySelector("#container");
+let treeInst = new SuperTreeDom(container, musicTreeObj);
+treeInst.initialization();
 
-btnGen.onclick = function(event) {
-  var inputGenre = document.querySelector("#inputGenre").value;
+//adding a root node
+let btnGen = document.querySelector(".addBtn");
 
-	if ( inputGenre === '' ) {
+btnGen.onclick = (event) => {
+  let inputGenre = document.querySelector("#inputGenre").value;
+
+	if ( inputGenre === "" ) {
     alert("You must write genre name!");
     return false;
   }
 
-  container.querySelector("ul").appendChild(createLiElem(inputGenre));
+  container.querySelector("ul").appendChild(treeInst.createLiElem(inputGenre));
   document.querySelector("#inputGenre").value = "";
+  
   localStorage.setItem("htmlConteiner", container.innerHTML);
-}
-
-//Функция для создания элемента дерева
-function createLiElem(strInLi) {
-	var liElem = document.createElement("LI");
-  var spanElem = document.createElement("SPAN");
-  var textElem = document.createTextNode(strInLi);
-  spanElem.appendChild(textElem);
-  liElem.appendChild(spanElem);
-
-  spanElem = document.createElement("SPAN");
-  spanElem.classList.add("close");
-  txtElem = document.createTextNode("\u00D7");
-  spanElem.appendChild(txtElem);
-  liElem.appendChild(spanElem);
-
-  spanElem = document.createElement("SPAN");
-  spanElem.classList.add("add");
-  txtElem = document.createTextNode("\u002B");
-  spanElem.appendChild(txtElem);
-  liElem.appendChild(spanElem);
-
-  spanElem = document.createElement("SPAN");
-  spanElem.classList.add("edit");
-  txtElem = document.createTextNode("\u002A");
-  spanElem.appendChild(txtElem);
-  liElem.appendChild(spanElem);
-  return liElem;
 }
