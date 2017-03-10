@@ -1,6 +1,6 @@
-.body {
+body {
   padding: 0;
-  font-family: "Arial", sans-serif;
+  font-family: 'Karla', sans-serif;
 }
 
 .header {
@@ -21,7 +21,7 @@
   font-weight:bold;
 }
 
-input {
+.header input {
   border: none;
   width: 75%;
   padding: 5px;
@@ -29,11 +29,14 @@ input {
   font-size: 16px;
 }
 
-.addBtn {
+.header .addBtn {
   padding: 5px;
+  height: 29px;
+  font-size: 12px;
+  line-height: 12px;
   width: 20%;
   background: #d9d9d9;
-  color: #555555;
+  color: #555;
   float: left;
   text-align: center;
   font-size: 16px;
@@ -41,8 +44,8 @@ input {
   transition: 0.3s;
 }
 
-.addBtn:hover {
-  background-color: #bbbbbb;
+.header .addBtn:hover {
+  background-color: #bbb;
 }
 
 .main-list ul {
@@ -50,7 +53,7 @@ input {
   margin: 0;
   list-style: none;
   background: #f5f5f5;
-  color: #555555;
+  color: #555;
 }
 
 .main-list > ul > li {
@@ -71,7 +74,8 @@ input {
 }
 
 .main-list ul span:hover {
-  background: #888888;
+  background: #888;
+  color: white;
   font-weight: bold;
   transition: 0.3s;
 }
@@ -87,15 +91,15 @@ input {
   list-style: none;
 }
 
-.main-list .close {
+.main-list .edit {
   position: absolute;
-  right: 0;
+  right: 77px;
   top: 0;
-  padding: 5px 15px;
+  padding: 9px 15px 1px 15px;
 }
 
-.main-list .close:hover {
-  background-color: #f44336;
+.main-list .edit:hover {
+  background-color: #48d1cc;
   color: white;
 }
 
@@ -111,14 +115,14 @@ input {
   color: white;
 }
 
-.main-list .edit{
+.main-list .delete {
   position: absolute;
-  right: 78px;
+  right: 0;
   top: 0;
   padding: 7px 15px 3px 15px;
 }
 
-.main-list .edit:hover {
-  background-color: #48d1cc;
+.main-list .delete:hover {
+  background-color: #f44336;
   color: white;
 }
