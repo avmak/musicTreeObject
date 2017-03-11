@@ -1,4 +1,4 @@
-// initial data -  js array for building a tree
+// array of Objects for building a tree
 const musicTreeObj = [
 	{ title: 'Hard Rock',
   	children: [
@@ -97,19 +97,30 @@ const musicTreeObj = [
   }
 ]
 
-// class for working with initial data
+/** Class to display the object tree. */
 class SuperTreeDom {
+	/**
+   * Initial data.
+   * @param {HTMLElement} destination - Destination element to the HTML DOM.
+   * @param {Array.<Object>} arrObjects - Array of Objects for building a tree.
+   */
 	constructor (destination, arrObjects) {
   	this.des = destination;
   	this.arr = arrObjects;
 	}
   
-  // adding a tree on page
+  /**
+   * Add a objects tree to the HTML DOM.
+   */ 
   _addTreeOnPage() {
     this.des.innerHTML = this._buildTreeDom(this.arr);
   }
-  
-  // building a tree from initial data
+
+  /**
+   * Build a objects tree from initial data.
+   * @param {Array.<Object>} initialData - Array of Objects for building a tree.
+   * @return {string} The content of the destination element.
+   */
   _buildTreeDom(initialData) {
     if ( initialData.length ) {
   		let str = '<ul>';
@@ -123,14 +134,17 @@ class SuperTreeDom {
         		str += nestedUl;
       		}
 
-      		str += '</li>'
+      		str += '</li>';
     		}
   		);
   		return str += '</ul>';
 		}
   }
-  
-  // creating li element
+
+  /**
+   * Generate a string with the contents of the LI element.
+   * @param {string} The content LI element.
+   */
   createLiElem(title) { 
     return `<span>${title}</span>
     				<span class="edit">\u002A</span>
@@ -138,7 +152,11 @@ class SuperTreeDom {
             <span class="delete">\u00D7</span>`;
   }
   
-  // initialization tree objects
+  /**
+   * Initializes the data source to display the object tree.
+   * Hangs an events to process user actions.
+   * Events: closure/disclosure/deleting/editing/creating
+   */
   initialization() {
   	if ( localStorage.getItem('htmlConteiner') ) {
     	this.des.innerHTML = localStorage.getItem('htmlConteiner');
@@ -146,18 +164,17 @@ class SuperTreeDom {
     	this._addTreeOnPage();
     }
     
-    // events: closure/disclosure/deleting/editing/creating
     this.des.addEventListener('click', (event) => {
     	const { target } = event;
         
       if ( target.tagName === 'SPAN' && target.classList.contains('delete') ) {
         target.closest('ul').removeChild(target.parentNode);
         
-        this.saveChange(this.des.innerHTML);
+        helpers.saveChange(this.des.innerHTML);
     		return;
   		} else if ( target.tagName === 'SPAN' && target.classList.contains('add') ) {
   				const nameNewItem = prompt('Enter the name of the new item:', '');
-    			if ( this.isStrEmpty(nameNewItem) ) return;
+    			if ( helpers.isStringEmpty(nameNewItem) ) return;
 					
           let liElem = document.createElement('LI'),
           		ulElem;
@@ -172,19 +189,19 @@ class SuperTreeDom {
       			target.parentNode.appendChild(ulElem);
     			}
     			
-          this.saveChange(this.des.innerHTML);
+          helpers.saveChange(this.des.innerHTML);
     			return;
   		} else if ( target.tagName === 'SPAN' && target.classList.contains('edit') ) {
   				const oldNameItem = target.parentNode.firstElementChild.innerHTML,
     					newNameItem = prompt('Enter the name of the new item:', oldNameItem);
     			
-          if ( this.isStrEmpty(newNameItem) ) return;
+          if ( helpers.isStringEmpty(newNameItem) ) return;
 					
           const textElem = document.createTextNode(newNameItem);
           target.parentNode.firstElementChild.replaceChild(textElem, 
           	target.parentNode.firstElementChild.firstChild);
         	
-          this.saveChange(this.des.innerHTML);
+          helpers.saveChange(this.des.innerHTML);
         	return;
   		}	else if ( target.tagName === 'SPAN' ) {
   				const childrContainer = target.parentNode.querySelector('ul');
@@ -192,45 +209,43 @@ class SuperTreeDom {
 
     			childrContainer.hidden = !childrContainer.hidden;
         	
-          this.saveChange(this.des.innerHTML);
+          helpers.saveChange(this.des.innerHTML);
     			return;
   		}
     });
   }
-  
-  // checking if a string is blank, null, undefined or contains only white-space
-  isStrEmpty(str) {
-    return ( !str || !str.trim() );
-	}
-  
-  saveChange(payload) {
-  	localStorage.setItem('htmlConteiner', payload);
-  }
 }
 
-// check the working capacity of the class
+// additional utilities
+// saveChange: saving changes in local storage
+// isStringEmpty: checking a string is blank, null, undefined or contains only white-space
+const helpers = {
+  saveChange: (payload) => localStorage.setItem('htmlConteiner', payload),
+  isStringEmpty: (string) => !string || !string.trim()
+};
+
+// checking the working capacity of the class
 let container = document.querySelector('#container'),
 		treeInst = new SuperTreeDom(container, musicTreeObj);
 
 treeInst.initialization();
 
-//adding a root node
+// adding a root node
 let btnGen = document.querySelector('.addBtn');
 
 btnGen.onclick = () => {
-  let inputGenre = document.querySelector('#inputGenre').value,
-  		liElem;
+  let inputGenre = document.querySelector('#inputGenre').value;
       
-	if ( treeInst.isStrEmpty(inputGenre) ) {
+	if ( helpers.isStringEmpty(inputGenre) ) {
     alert('You must write genre name!');
     return false;
   }
 	
-  liElem = document.createElement('LI');
+  let liElem = document.createElement('LI');
   liElem.innerHTML = treeInst.createLiElem(inputGenre);
   container.querySelector('ul').appendChild(liElem);
   document.querySelector('#inputGenre').value = '';
   
-  treeInst.saveChange(container.innerHTML);
+  helpers.saveChange(container.innerHTML);
   return;
 }
