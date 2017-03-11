@@ -49,6 +49,31 @@ const musicTreeObj = [
     ]
   },
   {
+  	title: 'Melodic Death Metal',
+    children: [
+    	{ title: 'In Flames',
+        children: [
+          { title: 'A Sense of Purpose',
+            children: []
+          },
+          { title: 'Clayman',
+            children: []
+          },
+          { title: 'Reroute to Remain',
+            children: []
+          }
+    		]
+  		},
+      { title: 'Insomnium',
+        children: [
+          { title: 'Above the Weeping World',
+            children: []
+          }
+    		]
+  		}
+    ]
+  },
+  {
   	title: 'Nu Metal',
     children: [
     	{ title: 'Korn',
@@ -78,44 +103,41 @@ class SuperTreeDom {
   	this.des = destination;
   	this.arr = arrObjects;
 	}
-
+  
   // adding a tree on page
   _addTreeOnPage() {
-  	this.des.appendChild(this._buildTreeDom(this.arr));
+    this.des.innerHTML = this._buildTreeDom(this.arr);
   }
-
+  
   // building a tree from initial data
   _buildTreeDom(initialData) {
-  	if ( initialData.length ) {
-    	let ulElem = document.createElement('UL');
+    if ( initialData.length ) {
+  		let str = '<ul>';
 
   		initialData.map(
-  			(item) => {
-        	let nestedUl = this._buildTreeDom(item.children),
-          		liElem = document.createElement('LI');
+    		(item) => {
+      		const nestedUl = this._buildTreeDom(item.children);
+      		str += '<li>' + this.createLiElem(item.title);
 
-          liElem.innerHTML = this.createLiElem(item.title);
+      		if ( nestedUl ) {
+        		str += nestedUl;
+      		}
 
-          if ( nestedUl ) {
-          	liElem.appendChild(nestedUl);
-          }
-
-    			ulElem.appendChild(liElem);
-  			}
+      		str += '</li>'
+    		}
   		);
-
-      return ulElem;
-    }
+  		return str += '</ul>';
+		}
   }
-
+  
   // creating li element
-  createLiElem(title) {
+  createLiElem(title) { 
     return `<span>${title}</span>
     				<span class="edit">\u002A</span>
             <span class="add">\u002B</span>
             <span class="delete">\u00D7</span>`;
   }
-
+  
   // initialization tree objects
   initialization() {
   	if ( localStorage.getItem('htmlConteiner') ) {
@@ -123,65 +145,67 @@ class SuperTreeDom {
     } else {
     	this._addTreeOnPage();
     }
-
+    
+    // events: closure/disclosure/deleting/editing/creating
     this.des.addEventListener('click', (event) => {
-    	const target = event.target;
-
-      // events: closure/disclosure/deleting/editing/creating
+    	const { target } = event;
+        
       if ( target.tagName === 'SPAN' && target.classList.contains('delete') ) {
         target.closest('ul').removeChild(target.parentNode);
-
-        localStorage.setItem('htmlConteiner', this.des.innerHTML);
+        
+        this.saveChange(this.des.innerHTML);
     		return;
   		} else if ( target.tagName === 'SPAN' && target.classList.contains('add') ) {
-  				let nameNewItem = prompt('Enter the name of the new item:', '');
+  				const nameNewItem = prompt('Enter the name of the new item:', '');
     			if ( this.isStrEmpty(nameNewItem) ) return;
-
+					
           let liElem = document.createElement('LI'),
           		ulElem;
-
+              
     			if ( target.parentNode.lastElementChild.tagName === 'UL' ) {
           	liElem.innerHTML = this.createLiElem(nameNewItem);
     				target.parentNode.lastElementChild.appendChild(liElem);
     			} else {
-    				let ulElem = document.createElement('UL');
+    				const ulElem = document.createElement('UL');
             liElem.innerHTML = this.createLiElem(nameNewItem);
       			ulElem.appendChild(liElem);
       			target.parentNode.appendChild(ulElem);
     			}
-
-        	localStorage.setItem('htmlConteiner', this.des.innerHTML);
+    			
+          this.saveChange(this.des.innerHTML);
     			return;
   		} else if ( target.tagName === 'SPAN' && target.classList.contains('edit') ) {
-  				let oldNameItem = target.parentNode.firstElementChild.innerHTML,
+  				const oldNameItem = target.parentNode.firstElementChild.innerHTML,
     					newNameItem = prompt('Enter the name of the new item:', oldNameItem);
-
+    			
           if ( this.isStrEmpty(newNameItem) ) return;
-
-          let textElem = document.createTextNode(newNameItem);
-          target.parentNode.firstElementChild.replaceChild(textElem,
+					
+          const textElem = document.createTextNode(newNameItem);
+          target.parentNode.firstElementChild.replaceChild(textElem, 
           	target.parentNode.firstElementChild.firstChild);
-
-    			localStorage.setItem('htmlConteiner', container.innerHTML);
+        	
+          this.saveChange(this.des.innerHTML);
         	return;
   		}	else if ( target.tagName === 'SPAN' ) {
-  				let childrContainer = target.parentNode.querySelector('ul');
+  				const childrContainer = target.parentNode.querySelector('ul');
 					if ( !childrContainer ) return;
 
     			childrContainer.hidden = !childrContainer.hidden;
-
-    			localStorage.setItem('htmlConteiner', this.des.innerHTML);
+        	
+          this.saveChange(this.des.innerHTML);
     			return;
   		}
-
-			return;
     });
   }
-
+  
   // checking if a string is blank, null, undefined or contains only white-space
   isStrEmpty(str) {
     return ( !str || !str.trim() );
 	}
+  
+  saveChange(payload) {
+  	localStorage.setItem('htmlConteiner', payload);
+  }
 }
 
 // check the working capacity of the class
@@ -193,20 +217,20 @@ treeInst.initialization();
 //adding a root node
 let btnGen = document.querySelector('.addBtn');
 
-btnGen.onclick = (event) => {
+btnGen.onclick = () => {
   let inputGenre = document.querySelector('#inputGenre').value,
   		liElem;
-
+      
 	if ( treeInst.isStrEmpty(inputGenre) ) {
     alert('You must write genre name!');
     return false;
   }
-
+	
   liElem = document.createElement('LI');
   liElem.innerHTML = treeInst.createLiElem(inputGenre);
   container.querySelector('ul').appendChild(liElem);
   document.querySelector('#inputGenre').value = '';
-
-  localStorage.setItem('htmlConteiner', container.innerHTML);
+  
+  treeInst.saveChange(container.innerHTML);
   return;
 }
